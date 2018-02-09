@@ -6,7 +6,7 @@ func main() {
 	app := iris.New()
 
 	app.Handle("GET", "/", func(ctx iris.Context) {
-		ctx.HTML("<h1>Hello World</h1>")
+		ctx.HTML("<h1>Hello World!</h1>")
 	})
 
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
