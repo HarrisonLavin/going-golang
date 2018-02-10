@@ -27,9 +27,9 @@ func main() {
 	c := session.DB("quote-db").C("quote")
 	c.Insert(&Quote{"Lajos Kossuth", "On History", "History is the revelation of providence."})
 
-	app.Get("/quote", func(ctx iris.Context) {
+	app.Get("/", func(ctx iris.Context) {
 		result := Quote{}
-		err = c.Find(bson.M{"Author": "Lajos Kossuth"}).One(&result)
+		err = c.Find(bson.M{"author": "Lajos Kossuth"}).One(&result)
 		if err != nil {
 			log.Fatal(err)
 		}
