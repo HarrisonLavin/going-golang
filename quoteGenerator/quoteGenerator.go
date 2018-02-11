@@ -1,13 +1,13 @@
 package main
 
 import (
+	// "encoding/json"
+	// "encoding/xml"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/kataras/iris"
-	mgo "gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Quote struct {
@@ -30,23 +30,35 @@ func main() {
 
 	app := iris.Default()
 
-	session, err := mgo.Dial("localhost")
-	if nil != err {
-		panic(err)
+	fileStat, err := xmlFile.Stat()
+	if err != nil {
+		log.Fatal(err)
 	}
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 
-	c := session.DB("quote-db").C("quote")
-	c.Insert(&Quote{"Lajos Kossuth", "On History", "History is the revelation of providence."})
+	data := make([]byte, fileStat.Size())
+
+	part, err := xmlFile.Read(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// session, err := mgo.Dial("localhost")
+	// if nil != err {
+	// 	panic(err)
+	// }
+	// defer session.Close()
+	// session.SetMode(mgo.Monotonic, true)
+
+	// c := session.DB("quote-db").C("quote")
+	// c.Insert(&Quote{"Lajos Kossuth", "On History", "History is the revelation of providence."})
 
 	app.Get("/", func(ctx iris.Context) {
-		result := Quote{}
-		err = c.Find(bson.M{"author": "Lajos Kossuth"}).One(&result)
-		if err != nil {
-			log.Fatal(err)
-		}
-		ctx.JSON(result)
+		// result := Quote{}
+		// err = c.Find(bson.M{"author": "Lajos Kossuth"}).One(&result)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// ctx.JSON(result)
+		ctx.HTML(string(part))
 	})
 
 	app.Run(iris.Addr(":8080"))
