@@ -3,6 +3,7 @@ package main
 import (
 	// "encoding/json"
 	// "encoding/xml"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"os"
@@ -14,6 +15,19 @@ type Quote struct {
 	Author  string
 	Subject string
 	Text    string
+}
+
+type GameData struct {
+}
+
+type BaseGameText struct {
+	XMLName xml.Name `xml:"baseGameText" json:"-"`
+	RowList []Row    `xml:"row" json:"Row"`
+}
+
+type Row struct {
+	Subject string `xml:"Tag,attr"`
+	Text    string `xml:"Text"`
 }
 
 func main() {
