@@ -8,9 +8,6 @@ import (
 	"os"
 )
 
-// our struct which contains the complete
-// array of all Users in the file
-
 type Row struct {
 	Subject string `xml:"tag,attr"`
 	Text    string
