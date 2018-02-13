@@ -108,7 +108,6 @@ func main() {
 	app := iris.Default()
 
 	app.Get("/", func(ctx iris.Context) {
-		// result := Quote{}
 		pipe := c.Pipe([]bson.M{{"$sample": bson.M{"size": 1}}})
 		resp := []bson.M{}
 		err := pipe.All(&resp)
