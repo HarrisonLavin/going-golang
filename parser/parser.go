@@ -42,7 +42,7 @@ func main() {
 	xml.Unmarshal(byteValue, &gameData)
 
 	for i := 0; i < len(gameData.BaseGameText.Rows); i++ {
-		fmt.Println("User Type: " + gameData.BaseGameText.Rows[i].Text)
+		fmt.Println("Quote Data: " + gameData.BaseGameText.Rows[i].Text)
 	}
 
 }
