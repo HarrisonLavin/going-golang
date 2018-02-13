@@ -48,9 +48,13 @@ func makeQuote(row Row, isGreatwork bool) Quote {
 		text = strArray[0]
 		author = subject
 	} else {
-		strArray = strings.Split(row.Text, "[NEWLINE]– ")
+		strArray = strings.Split(row.Text, "[NEWLINE]")
 		text = strArray[0]
-		author = strArray[1]
+		if len(strArray) > 1 {
+			author = strArray[1]
+		} else {
+			author = "Anonymous"
+		}
 	}
 	text = strings.Replace(text, "”", "", -1)
 	text = strings.Replace(text, "“", "", -1)
