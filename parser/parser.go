@@ -45,6 +45,8 @@ func makeQuote(row Row) Quote {
 	strArray = strings.Split(row.Text, "[NEWLINE]– ")
 	author := strArray[1]
 	text := strArray[0]
+	text = strings.Replace(text, "”", "", -1)
+	text = strings.Replace(text, "“", "", -1)
 	quote := Quote{
 		Subject: subject,
 		Author:  author,
