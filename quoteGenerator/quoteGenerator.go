@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -101,19 +100,18 @@ func main() {
 	for i := 0; i < len(gameData.BaseGameText.Rows); i++ {
 		isGreatwork := strings.Contains(gameData.BaseGameText.Rows[i].Subject, "GREATWORK")
 		quote = makeQuote(gameData.BaseGameText.Rows[i], isGreatwork)
-		b, err := json.Marshal(quote)
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-		c.Insert(b)
+		c.Insert(quote)
 	}
 	app := iris.Default()
 
 	app.Get("/", func(ctx iris.Context) {
 		result := Quote{}
-		err = c.Find(bson.M{"Subject": "Printing"}).One(&result)
+		err = c.Find(bson.M{"subject": "Printing"}).One(&result)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("error:", err)
 		}
 		ctx.JSON(result)
 	})
