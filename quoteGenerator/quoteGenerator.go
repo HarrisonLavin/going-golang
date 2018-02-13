@@ -48,7 +48,7 @@ func makeQuote(row Row, isGreatwork bool) Quote {
 	var text string
 	var author string
 	if isGreatwork {
-		text = strArray[0]
+		text = row.Text
 		author = subject
 	} else {
 		strArray = strings.Split(row.Text, "[NEWLINE]")
