@@ -49,7 +49,6 @@ func makeQuote(row Row) Quote {
 		Subject: subject,
 		Author:  author,
 		Text:    text}
-	// \[NEWLINE\]– (Gustave Eiffel)
 	return quote
 }
 
