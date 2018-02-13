@@ -108,12 +108,14 @@ func main() {
 	app := iris.Default()
 
 	app.Get("/", func(ctx iris.Context) {
-		result := Quote{}
-		err = c.Find(bson.M{"subject": "Printing"}).One(&result)
+		// result := Quote{}
+		pipe := c.Pipe([]bson.M{{"$sample": bson.M{"size": 1}}})
+		resp := []bson.M{}
+		err := pipe.All(&resp)
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-		ctx.JSON(result)
+		ctx.JSON(resp)
 	})
 
 	app.Run(iris.Addr(":8080"))
