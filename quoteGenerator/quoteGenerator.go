@@ -1,80 +1,109 @@
 package main
 
 import (
-	// "encoding/json"
-	// "encoding/xml"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
+	"unicode"
 
 	"github.com/kataras/iris"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
-type Quote struct {
-	Author  string
-	Subject string
-	Text    string
-}
-
 type GameData struct {
+	BaseGameText BaseGameText
 }
 
 type BaseGameText struct {
-	XMLName xml.Name `xml:"baseGameText" json:"-"`
-	RowList []Row    `xml:"row" json:"Row"`
+	XMLName xml.Name
+	Rows    []Row `xml:"Row"`
 }
 
 type Row struct {
 	Subject string `xml:"Tag,attr"`
-	Text    string `xml:"Text"`
+	Text    string
+}
+
+type Quote struct {
+	Subject string
+	Text    string
+	Author  string
+}
+
+func makeQuote(row Row) Quote {
+
+	x := func(c rune) bool {
+		return !unicode.IsLetter(c)
+	}
+
+	strArray := strings.FieldsFunc(row.Subject, x)
+	strArray = strArray[2:]
+	strArray = strArray[:len(strArray)-1]
+	subject := strings.Join(strArray, " ")
+	subject = strings.Title(strings.ToLower(subject))
+	strArray = strings.Split(row.Text, "[NEWLINE]– ")
+	author := strArray[1]
+	text := strArray[0]
+	text = strings.Replace(text, "”", "", -1)
+	text = strings.Replace(text, "“", "", -1)
+	quote := Quote{
+		Subject: subject,
+		Author:  author,
+		Text:    text}
+	return quote
 }
 
 func main() {
-
-	xmlFile, err := os.Open("Quotes.xml")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Successfully Opened Quotes.xml")
-	// defer the closing of our xmlFile so that we can parse it later on
-	defer xmlFile.Close()
-
 	app := iris.Default()
 
-	fileStat, err := xmlFile.Stat()
-	if err != nil {
-		log.Fatal(err)
+	session, err := mgo.Dial("localhost")
+	if nil != err {
+		panic(err)
 	}
-
-	data := make([]byte, fileStat.Size())
-
-	part, err := xmlFile.Read(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// session, err := mgo.Dial("localhost")
-	// if nil != err {
-	// 	panic(err)
-	// }
-	// defer session.Close()
-	// session.SetMode(mgo.Monotonic, true)
-
-	// c := session.DB("quote-db").C("quote")
-	// c.Insert(&Quote{"Lajos Kossuth", "On History", "History is the revelation of providence."})
-
-	app.Get("/", func(ctx iris.Context) {
-		// result := Quote{}
-		// err = c.Find(bson.M{"author": "Lajos Kossuth"}).One(&result)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// ctx.JSON(result)
-		ctx.HTML(string(part))
-	})
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
 
 	app.Run(iris.Addr(":8080"))
+
+	xmlFile, err := os.Open("quotes.xml")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer xmlFile.Close()
+
+	byteValue, err := ioutil.ReadAll(xmlFile)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var gameData GameData
+	xml.Unmarshal(byteValue, &gameData)
+
+	c := session.DB("quote-db").C("quote")
+
+	for i := 0; i < len(gameData.BaseGameText.Rows); i++ {
+		quote := makeQuote(gameData.BaseGameText.Rows[i])
+		// b, err := json.Marshal(quote)
+		// if err != nil {
+		// 	fmt.Println("error:", err)
+		// }
+		c.Insert(quote)
+	}
+
+	app.Get("/", func(ctx iris.Context) {
+		result := Quote{}
+		err = c.Find(bson.M{"author": "Janine Benyus"}).One(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ctx.JSON(result)
+	})
 
 }

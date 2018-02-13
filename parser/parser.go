@@ -31,7 +31,7 @@ type Quote struct {
 	Author  string
 }
 
-func makeQuote(row Row) Quote {
+func makeQuote(row Row, isGreatwork bool) Quote {
 
 	x := func(c rune) bool {
 		return !unicode.IsLetter(c)
@@ -42,9 +42,16 @@ func makeQuote(row Row) Quote {
 	strArray = strArray[:len(strArray)-1]
 	subject := strings.Join(strArray, " ")
 	subject = strings.Title(strings.ToLower(subject))
-	strArray = strings.Split(row.Text, "[NEWLINE]– ")
-	author := strArray[1]
-	text := strArray[0]
+	var text string
+	var author string
+	if isGreatwork {
+		text = strArray[0]
+		author = subject
+	} else {
+		strArray = strings.Split(row.Text, "[NEWLINE]– ")
+		text = strArray[0]
+		author = strArray[1]
+	}
 	text = strings.Replace(text, "”", "", -1)
 	text = strings.Replace(text, "“", "", -1)
 	quote := Quote{
@@ -71,10 +78,12 @@ func main() {
 	}
 
 	var gameData GameData
+	var quote Quote
 	xml.Unmarshal(byteValue, &gameData)
 
 	for i := 0; i < len(gameData.BaseGameText.Rows); i++ {
-		quote := makeQuote(gameData.BaseGameText.Rows[i])
+		isGreatwork := strings.Contains(gameData.BaseGameText.Rows[i].Subject, "GREATWORK")
+		quote = makeQuote(gameData.BaseGameText.Rows[i], isGreatwork)
 		b, err := json.Marshal(quote)
 		if err != nil {
 			fmt.Println("error:", err)
