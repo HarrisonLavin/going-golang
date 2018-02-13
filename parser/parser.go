@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
+	"unicode"
 )
 
 type GameData struct {
@@ -22,9 +25,37 @@ type Row struct {
 	Text    string
 }
 
+type Quote struct {
+	Subject string
+	Text    string
+	Author  string
+}
+
+func makeQuote(row Row) Quote {
+
+	x := func(c rune) bool {
+		return !unicode.IsLetter(c)
+	}
+
+	strArray := strings.FieldsFunc(row.Subject, x)
+	strArray = strArray[2:]
+	strArray = strArray[:len(strArray)-1]
+	subject := strings.Join(strArray, " ")
+	subject = strings.Title(strings.ToLower(subject))
+	strArray = strings.Split(row.Text, "[NEWLINE]– ")
+	author := strArray[1]
+	text := strArray[0]
+	quote := Quote{
+		Subject: subject,
+		Author:  author,
+		Text:    text}
+	// \[NEWLINE\]– (Gustave Eiffel)
+	return quote
+}
+
 func main() {
 
-	xmlFile, err := os.Open("quote.xml")
+	xmlFile, err := os.Open("quotes.xml")
 
 	if err != nil {
 		fmt.Println(err)
@@ -42,7 +73,12 @@ func main() {
 	xml.Unmarshal(byteValue, &gameData)
 
 	for i := 0; i < len(gameData.BaseGameText.Rows); i++ {
-		fmt.Println("Quote Data: " + gameData.BaseGameText.Rows[i].Text)
+		quote := makeQuote(gameData.BaseGameText.Rows[i])
+		b, err := json.Marshal(quote)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		os.Stdout.Write(b)
 	}
 
 }
