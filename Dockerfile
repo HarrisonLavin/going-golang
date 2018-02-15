@@ -1,5 +1,5 @@
 FROM scratch
 
-COPY /app /app/
+COPY /quoteGenerator /app/
 
 CMD [“/app”]
