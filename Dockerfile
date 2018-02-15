@@ -1,5 +1,11 @@
-FROM scratch
+FROM golang:1.9.4
 
-COPY /quoteGenerator /app/
+RUN mkdir -p /quoteGenerator
 
-CMD [“/app”]
+WORKDIR /quoteGenerator
+
+ADD . /quoteGenerator
+
+RUN go build ./quoteGenerator.go
+
+CMD ["./quoteGenerator"]
