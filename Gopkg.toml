@@ -64,3 +64,8 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+
+[metadata.heroku]
+  root-package = "github.com/harrisonlavin/going-golang"
+  go-version = "1.8.3"
